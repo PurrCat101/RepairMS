@@ -28,7 +28,8 @@ function AddRepairGuide({ onClose, onSuccess }) {
 
       const { data, error } = await supabase
         .from("repair_manuals")
-        .insert([formattedData]);
+        .insert([formattedData])
+        .select(); // เพิ่ม select() เพื่อรับข้อมูลที่เพิ่มกลับมา
 
       if (error) throw error;
 
