@@ -225,11 +225,7 @@ export default function RepairLogs() {
       issue: editForm.issue,
       status: editForm.status,
       priority: editForm.priority,
-      assigned_user_id:
-        editForm.assigned_user_id ||
-        (!currentUser?.role || currentUser.role !== "admin"
-          ? currentUser?.id
-          : null),
+      assigned_user_id: editForm.assigned_user_id || null,
       updated_at: new Date().toISOString(),
     };
 
