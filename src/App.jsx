@@ -71,7 +71,11 @@ function App() {
         </Routes>
       ) : (
         <div className="min-h-screen bg-gray-100">
-          <Navbar navigation={filteredNavigation} onLogout={handleLogout} />
+          <Navbar
+            navigation={filteredNavigation}
+            onLogout={handleLogout}
+            user={user}
+          />
           <main className="p-8 pt-24">
             <Routes>
               {user.role === "admin" && (
