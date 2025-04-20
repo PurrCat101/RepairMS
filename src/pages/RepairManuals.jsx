@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import AddRepairManual from "../components/AddRepairManual";
 import EditRepairManual from "../components/EditRepairManual";
+import { X } from "lucide-react";
 
 function RepairGuide() {
   const [guides, setGuides] = useState([]);
@@ -11,6 +12,7 @@ function RepairGuide() {
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedGuide, setSelectedGuide] = useState(null);
 
   useEffect(() => {
@@ -38,6 +40,28 @@ function RepairGuide() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedGuide) return;
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("repair_manuals")
+        .delete()
+        .eq("id", selectedGuide.id);
+
+      if (deleteError) {
+        setError("Error deleting repair manual");
+        return;
+      }
+
+      setShowDeleteDialog(false);
+      setSelectedGuide(null);
+      fetchRepairGuides();
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -140,27 +164,52 @@ function RepairGuide() {
             <h2 className="text-2xl font-semibold text-blue-600">
               {guide.device_name}
             </h2>
-            <button
-              onClick={() => {
-                setSelectedGuide(guide);
-                setShowEditModal(true);
-              }}
-              className="text-gray-600 hover:text-blue-600 flex items-center"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  setSelectedGuide(guide);
+                  setShowEditModal(true);
+                }}
+                className="text-gray-600 hover:text-blue-600 p-1"
+                title="Edit"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedGuide(guide);
+                  setShowDeleteDialog(true);
+                }}
+                className="text-gray-600 hover:text-red-600 p-1"
+                title="Delete"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className="text-xl text-red-600 mb-6">Issue: {guide.issue}</div>
@@ -216,6 +265,48 @@ function RepairGuide() {
             setSelectedGuide(null);
           }}
         />
+      )}
+
+      {showDeleteDialog && selectedGuide && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Confirm Delete</h2>
+              <button
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setSelectedGuide(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <p className="mb-6 text-gray-700">
+              Are you sure you want to delete the repair manual for "
+              {selectedGuide.device_name}"? This action cannot be undone.
+            </p>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setSelectedGuide(null);
+                }}
+                className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
