@@ -116,6 +116,7 @@ export default function EditModal({
                       >
                         <option value="pending">Pending</option>
                         <option value="in_progress">In Progress</option>
+                        <option value="incompleted">Incomplete</option>
                         <option value="completed">Completed</option>
                       </select>
                     </div>

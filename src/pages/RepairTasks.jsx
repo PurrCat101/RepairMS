@@ -84,7 +84,7 @@ export default function RepairLogs() {
       let query = supabase
         .from("repair_tasks")
         .select("*")
-        .neq("status", "completed")
+        .not("status", "in", "(completed,incompleted)")
         .order("created_at", { ascending: false });
 
       // Filter for technician role
@@ -111,7 +111,7 @@ export default function RepairLogs() {
       let query = supabase
         .from("repair_tasks")
         .select("*")
-        .neq("status", "completed");
+        .not("status", "in", "(completed,incompleted)");
 
       // Filter for technician role only
       if (currentUser?.role === "technician") {
@@ -555,12 +555,12 @@ export default function RepairLogs() {
         return;
       }
 
-      // Check if technician already has 3 or more pending tasks
+      // Check if technician already has 3 or more active tasks (not completed or incomplete)
       const { data: existingTasks, error: tasksError } = await supabase
         .from("repair_tasks")
         .select("id")
         .eq("assigned_user_id", rule.assigned_user_id)
-        .neq("status", "completed");
+        .not("status", "in", "(completed,incompleted)");
 
       if (tasksError) {
         console.error("Error checking existing tasks:", tasksError);
@@ -570,7 +570,7 @@ export default function RepairLogs() {
 
       if (existingTasks && existingTasks.length >= 3) {
         toast.error(
-          "Technician already has 3 or more incomplete tasks. Cannot assign more work."
+          "Technician already has 3 or more active tasks. Cannot assign more work."
         );
         return;
       }

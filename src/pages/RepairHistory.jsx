@@ -51,7 +51,7 @@ export default function RepairHistory() {
       const { data, error } = await supabase
         .from("repair_tasks")
         .select("*")
-        .eq("status", "completed")
+        .or("status.eq.completed,status.eq.incompleted")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -71,7 +71,7 @@ export default function RepairHistory() {
       let query = supabase
         .from("repair_tasks")
         .select("*")
-        .eq("status", "completed");
+        .or("status.eq.completed,status.eq.incompleted");
 
       if (searchTerm) {
         query = query.or(

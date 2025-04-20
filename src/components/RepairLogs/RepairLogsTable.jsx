@@ -1,5 +1,11 @@
 import React from "react";
-import { PenTool, AlertCircle, CheckCircle, UserPlus } from "lucide-react";
+import {
+  PenTool,
+  AlertCircle,
+  CheckCircle,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
 
 export default function RepairLogsTable({
   logs,
@@ -17,6 +23,8 @@ export default function RepairLogsTable({
         return <PenTool className="h-5 w-5 text-blue-500" />;
       case "completed":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case "incompleted":
+        return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return null;
     }
