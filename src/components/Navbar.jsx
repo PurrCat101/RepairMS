@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import NotificationPopover from "./NotificationPopover";
+import NotificationService from "../services/NotificationService";
 
 export default function Navbar({ navigation, onLogout, user }) {
   const location = useLocation();
@@ -12,9 +13,10 @@ export default function Navbar({ navigation, onLogout, user }) {
 
   useEffect(() => {
     if (user) {
+      // ดึงข้อมูลการแจ้งเตือนทั้งหมดเมื่อเริ่มต้น
       fetchNotifications();
 
-      // Subscribe to realtime notifications with conditions based on user role
+      // Subscribe to realtime notifications
       const channel = supabase
         .channel("notifications")
         .on(
@@ -23,18 +25,21 @@ export default function Navbar({ navigation, onLogout, user }) {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter:
-              user.role === "admin" ? undefined : `recipient_id=eq.${user.id}`,
           },
           (payload) => {
-            // Add notification only if it's new
-            setNotifications((prev) => {
-              // Check if notification already exists
-              const exists = prev.some((n) => n.id === payload.new.id);
-              if (exists) return prev;
-              return [payload.new, ...prev];
-            });
-            setUnreadCount((prev) => prev + 1);
+            // เพิ่มการแจ้งเตือนใหม่โดยตรวจสอบสิทธิ์การเข้าถึง
+            if (
+              payload.new.recipient_id === user.id ||
+              (user.role === "admin" && payload.new.for_role === "admin")
+            ) {
+              setNotifications((prev) => {
+                // ตรวจสอบว่ามีการแจ้งเตือนนี้อยู่แล้วหรือไม่
+                const exists = prev.some((n) => n.id === payload.new.id);
+                if (exists) return prev;
+                return [payload.new, ...prev];
+              });
+              setUnreadCount((prev) => prev + 1);
+            }
           }
         )
         .subscribe();
@@ -52,41 +57,14 @@ export default function Navbar({ navigation, onLogout, user }) {
         role: user.role,
       });
 
-      let query = supabase
-        .from("notifications")
-        .select("*")
-        .or(
-          `recipient_id.eq.${user.id},and(recipient_id.is.not.null,for_role.eq.${user.role})`
-        )
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const data = await NotificationService.fetchNotifications(
+        user.id,
+        user.role,
+        { limit: 100, offset: 0 }
+      );
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      console.log("Fetched notifications:", {
-        count: data?.length || 0,
-        notifications: data,
-      });
-
-      // กรองการแจ้งเตือนซ้ำออก (กรณี for_role และ recipient_id)
-      const uniqueNotifications =
-        data?.reduce((acc, curr) => {
-          const existingNotification = acc.find(
-            (n) =>
-              n.task_id === curr.task_id &&
-              n.type === curr.type &&
-              n.message === curr.message
-          );
-          if (!existingNotification) {
-            acc.push(curr);
-          }
-          return acc;
-        }, []) || [];
-
-      setNotifications(uniqueNotifications);
-      setUnreadCount(uniqueNotifications.filter((n) => !n.read).length);
+      setNotifications(data);
+      setUnreadCount(data.filter((n) => !n.read).length);
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
     }

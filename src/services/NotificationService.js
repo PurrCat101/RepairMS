@@ -1,0 +1,157 @@
+import { supabase } from "../lib/supabase";
+
+export const NotificationTypes = {
+  NEW_TASK: "new_task",
+  STATUS_CHANGE: "status_change",
+};
+
+class NotificationService {
+  async createNotification(notification) {
+    try {
+      console.log("Creating notification:", notification);
+      const { data, error } = await supabase
+        .from("notifications")
+        .insert(notification)
+        .select();
+
+      if (error) {
+        console.error("Error inserting notification:", error);
+        throw error;
+      }
+      console.log("Successfully inserted notification:", data);
+      return data;
+    } catch (err) {
+      console.error("Error in createNotification:", err);
+      throw err;
+    }
+  }
+
+  async markAsRead(notificationId) {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", notificationId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error marking notification as read:", error.message);
+      throw error;
+    }
+  }
+
+  async markAllAsRead(notificationIds) {
+    try {
+      if (!notificationIds?.length) return;
+
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .in("id", notificationIds);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error.message);
+      throw error;
+    }
+  }
+
+  async fetchNotifications(
+    userId,
+    userRole,
+    options = { limit: 50, offset: 0 }
+  ) {
+    try {
+      console.log("Fetching notifications for user:", {
+        userId,
+        role: userRole,
+        options,
+      });
+
+      let query = supabase.from("notifications").select("*");
+
+      // เงื่อนไขการเข้าถึงการแจ้งเตือน
+      if (userRole === "admin") {
+        // Admin เห็นทุกการแจ้งเตือนที่มี for_role = 'admin' หรือเป็นการแจ้งเตือนส่วนตัว
+        query = query.or(`recipient_id.eq.${userId},for_role.eq.admin`);
+      } else {
+        // ผู้ใช้ทั่วไปเห็นเฉพาะการแจ้งเตือนส่วนตัว
+        query = query.eq("recipient_id", userId);
+      }
+
+      // เรียงลำดับตามเวลาล่าสุด และจำกัดจำนวน
+      query = query
+        .order("created_at", { ascending: false })
+        .range(options.offset, options.offset + options.limit - 1);
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      console.log("Fetched notifications:", {
+        count: data?.length || 0,
+        notifications: data,
+      });
+
+      return this.removeDuplicateNotifications(data || []);
+    } catch (error) {
+      console.error("Error fetching notifications:", error.message);
+      throw error;
+    }
+  }
+
+  // Helpers
+  removeDuplicateNotifications(notifications) {
+    return notifications.reduce((acc, curr) => {
+      const existingNotification = acc.find(
+        (n) =>
+          n.task_id === curr.task_id &&
+          n.type === curr.type &&
+          n.message === curr.message
+      );
+      if (!existingNotification) {
+        acc.push(curr);
+      }
+      return acc;
+    }, []);
+  }
+
+  // Notification creators
+  async createNewTaskNotification(creatorId, deviceName, issue, taskId) {
+    return this.createNotification({
+      recipient_id: creatorId,
+      title: "งานซ่อมใหม่",
+      message: `มีการเพิ่มงานซ่อมใหม่: ${deviceName} - ${issue}`,
+      type: NotificationTypes.NEW_TASK,
+      task_id: taskId,
+      read: false,
+      created_at: new Date().toISOString(),
+      for_role: "admin",
+    });
+  }
+
+  async createStatusChangeNotification(
+    changerId,
+    deviceName,
+    issue,
+    newStatus,
+    changerName,
+    taskId
+  ) {
+    const status = newStatus === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
+    return this.createNotification({
+      recipient_id: changerId,
+      title: "สถานะงานเปลี่ยนแปลง",
+      message: `งานซ่อม ${deviceName} - ${issue} ถูกเปลี่ยนสถานะเป็น${status} โดย ${changerName}`,
+      type: NotificationTypes.STATUS_CHANGE,
+      task_id: taskId,
+      read: false,
+      created_at: new Date().toISOString(),
+      for_role: "admin",
+    });
+  }
+}
+
+export default new NotificationService();
