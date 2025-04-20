@@ -9,6 +9,7 @@ import {
   Users as UsersIcon,
   UserCog,
 } from "lucide-react";
+import { getCurrentUser } from "./lib/auth";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import RepairLogs from "./pages/RepairTasks";
@@ -32,7 +33,7 @@ const navigation = [
 
 function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Filter navigation items based on user role
   const filteredNavigation = navigation.filter((item) => {
@@ -42,20 +43,52 @@ function App() {
     return true;
   });
 
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        // ตรวจสอบ user จาก localStorage ก่อน
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+
+        // ตรวจสอบ session จาก Supabase
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+          const userData = {
+            ...currentUser,
+            role: currentUser.user_metadata?.role || "user",
+          };
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        } else if (!storedUser) {
+          setUser(null);
+          localStorage.removeItem("user");
+        }
+      } catch (error) {
+        console.error("Error checking user session:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+  }, []);
+
   const handleLogin = (userData) => {
     setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   // Get default redirect path based on role
   const getDefaultPath = () => {
     return user?.role === "admin" ? "/" : "/repair-tasks";
   };
-
-  useEffect(() => {}, []);
 
   return (
     <BrowserRouter>
