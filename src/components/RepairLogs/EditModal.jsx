@@ -109,7 +109,9 @@ export default function EditModal({
         ) {
           const status =
             editForm.status === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
-          const message = `งานซ่อม ${editForm.device_name} - ${editForm.issue} มีการเปลี่ยนสถานะเป็น${status}`;
+          const userFullName =
+            users.find((u) => u.id === user.id)?.full_name || "ไม่ระบุชื่อ";
+          const message = `งานซ่อม ${editForm.device_name} - ${editForm.issue} ถูกเปลี่ยนสถานะเป็น${status} โดย ${userFullName}`;
 
           console.log("Status change detected:", {
             oldStatus: selectedLog.status,
@@ -117,27 +119,15 @@ export default function EditModal({
             message,
           });
 
-          // สร้างการแจ้งเตือนเดียวสำหรับ admin และ officer
           await addNotification({
-            recipient_id: user.id, // ผู้อัพเดทสถานะ
+            recipient_id: user.id, // ผู้เปลี่ยนสถานะ
             title: "สถานะงานเปลี่ยนแปลง",
             message,
             type: "status_change",
             task_id: selectedLog.id,
             read: false,
             created_at: currentTime,
-            for_role: "admin", // admin จะเห็นการแจ้งเตือนนี้
-          });
-
-          await addNotification({
-            recipient_id: user.id, // ผู้อัพเดทสถานะ
-            title: "สถานะงานเปลี่ยนแปลง",
-            message,
-            type: "status_change",
-            task_id: selectedLog.id,
-            read: false,
-            created_at: currentTime,
-            for_role: "officer", // officer จะเห็นการแจ้งเตือนนี้
+            for_role: "admin", // เฉพาะ admin เท่านั้นที่จะเห็นการแจ้งเตือนนี้
           });
         }
       }
