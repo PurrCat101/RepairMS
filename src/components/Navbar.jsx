@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Wrench, LogOut, User, Bell } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import NotificationPopover from "./NotificationPopover";
 
 export default function Navbar({ navigation, onLogout, user }) {
   const location = useLocation();
@@ -91,24 +92,6 @@ export default function Navbar({ navigation, onLogout, user }) {
     }
   };
 
-  const markAsRead = async (notificationId) => {
-    try {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ read: true })
-        .eq("id", notificationId);
-
-      if (error) throw error;
-
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
-      );
-      setUnreadCount((prev) => prev - 1);
-    } catch (error) {
-      console.error("Error marking notification as read:", error.message);
-    }
-  };
-
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -126,10 +109,7 @@ export default function Navbar({ navigation, onLogout, user }) {
         <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
-              <Wrench className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">
-                RepairMS
-              </span>
+              <span className="text-xl font-bold text-gray-900">RepairMS</span>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {
@@ -152,54 +132,12 @@ export default function Navbar({ navigation, onLogout, user }) {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="relative group">
-              <div className="flex items-center cursor-pointer p-2 rounded-full hover:bg-gray-100">
-                <div className="relative">
-                  <Bell className="h-5 w-5 text-gray-600" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 text-xs flex items-center justify-center bg-red-500 text-white rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="absolute right-0 w-80 mt-2 py-2 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                <div className="px-4 py-2 border-b">
-                  <p className="text-sm font-medium text-gray-900">
-                    การแจ้งเตือน
-                  </p>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                          !notification.read ? "bg-blue-50" : ""
-                        }`}
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        <p className="text-sm font-medium text-gray-900">
-                          {notification.title}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(notification.created_at).toLocaleString(
-                            "th-TH"
-                          )}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-3 text-sm text-gray-500">
-                      ไม่มีการแจ้งเตือนใหม่
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <NotificationPopover
+              notifications={notifications}
+              unreadCount={unreadCount}
+              setNotifications={setNotifications}
+              setUnreadCount={setUnreadCount}
+            />
             <div className="relative group">
               <div className="flex items-center cursor-pointer p-2 rounded-full hover:bg-gray-100">
                 <User className="h-5 w-5 text-gray-600" />
