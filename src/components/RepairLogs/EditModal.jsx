@@ -2,6 +2,7 @@ import React from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import RepairTaskPDF from "./RepairTaskPDF";
 import { toast } from "react-hot-toast";
+import { supabase } from "../../lib/supabase";
 
 export default function EditModal({
   isOpen,
@@ -18,8 +19,28 @@ export default function EditModal({
   selectedSpareParts,
   handleSparePartQuantityChange,
   handleRemoveSparePart,
+  user, // เพิ่ม prop user
 }) {
   if (!isOpen) return null;
+
+  // เพิ่มฟังก์ชันสำหรับสร้างการแจ้งเตือน
+  const addNotification = async (notification) => {
+    try {
+      console.log("Creating notification:", notification);
+      const { data, error } = await supabase
+        .from("notifications")
+        .insert(notification)
+        .select();
+
+      if (error) {
+        console.error("Error inserting notification:", error);
+      } else {
+        console.log("Successfully inserted notification:", data);
+      }
+    } catch (err) {
+      console.error("Error in addNotification:", err);
+    }
+  };
 
   const pdfData = {
     ...editForm,
@@ -30,13 +51,100 @@ export default function EditModal({
     })),
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!editForm.device_name.trim() || !editForm.issue.trim()) {
       toast.error("Device name and Issue are required");
       return;
     }
-    handleSubmit(e);
+
+    try {
+      console.log("Form submission started:", {
+        isNewTask: !selectedLog?.id,
+        formData: editForm,
+      });
+
+      const result = await handleSubmit(e);
+
+      console.log("Form submission result:", result);
+      const currentTime = new Date().toISOString();
+
+      if (result?.taskId) {
+        console.log("Processing new task notification");
+
+        // สร้างการแจ้งเตือนเดียวสำหรับงานใหม่
+        await addNotification({
+          recipient_id: user.id, // ผู้สร้างงาน
+          title: "งานซ่อมใหม่",
+          message: `มีการเพิ่มงานซ่อมใหม่: ${editForm.device_name} - ${editForm.issue}`,
+          type: "new_task",
+          task_id: result.taskId,
+          read: false,
+          created_at: currentTime,
+          for_role: "admin", // ระบุว่าทุก admin สามารถเห็นได้
+        });
+
+        // ถ้ามีการมอบหมายงาน แจ้งเตือนช่างเฉพาะคน
+        if (editForm.assigned_user_id) {
+          console.log(
+            "Creating notification for assigned technician:",
+            editForm.assigned_user_id
+          );
+          await addNotification({
+            recipient_id: editForm.assigned_user_id,
+            title: "ได้รับมอบหมายงานใหม่",
+            message: `คุณได้รับมอบหมายให้ซ่อม ${editForm.device_name} - ${editForm.issue}`,
+            type: "task_assigned",
+            task_id: result.taskId,
+            read: false,
+            created_at: currentTime,
+            for_role: null, // การแจ้งเตือนส่วนตัว
+          });
+        }
+      } else if (selectedLog?.id) {
+        // กรณีอัพเดทงาน
+        if (
+          selectedLog.status !== editForm.status &&
+          (editForm.status === "completed" || editForm.status === "incompleted")
+        ) {
+          const status =
+            editForm.status === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
+          const message = `งานซ่อม ${editForm.device_name} - ${editForm.issue} มีการเปลี่ยนสถานะเป็น${status}`;
+
+          console.log("Status change detected:", {
+            oldStatus: selectedLog.status,
+            newStatus: editForm.status,
+            message,
+          });
+
+          // สร้างการแจ้งเตือนเดียวสำหรับ admin และ officer
+          await addNotification({
+            recipient_id: user.id, // ผู้อัพเดทสถานะ
+            title: "สถานะงานเปลี่ยนแปลง",
+            message,
+            type: "status_change",
+            task_id: selectedLog.id,
+            read: false,
+            created_at: currentTime,
+            for_role: "admin", // admin จะเห็นการแจ้งเตือนนี้
+          });
+
+          await addNotification({
+            recipient_id: user.id, // ผู้อัพเดทสถานะ
+            title: "สถานะงานเปลี่ยนแปลง",
+            message,
+            type: "status_change",
+            task_id: selectedLog.id,
+            read: false,
+            created_at: currentTime,
+            for_role: "officer", // officer จะเห็นการแจ้งเตือนนี้
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error in handleFormSubmit:", err);
+      toast.error("An unexpected error occurred");
+    }
   };
 
   return (

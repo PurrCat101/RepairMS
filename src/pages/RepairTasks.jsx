@@ -231,6 +231,7 @@ export default function RepairLogs() {
 
     try {
       let error;
+      let result = {};
 
       // Format spare parts data for saving
       const formattedSpareParts = selectedSpareParts.map((sp) => ({
@@ -346,14 +347,21 @@ export default function RepairLogs() {
           }
         }
       } else {
-        // Insert new log
-        const { error: insertError } = await supabase
+        // สร้างงานใหม่
+        const { data, error: insertError } = await supabase
           .from("repair_tasks")
           .insert({
             ...formData,
             created_at: new Date().toISOString(),
-          });
+          })
+          .select()
+          .single();
+
         error = insertError;
+
+        if (!error && data) {
+          result.taskId = data.id;
+        }
 
         // For new logs, reduce stock for all parts
         for (const sp of selectedSpareParts) {
@@ -399,6 +407,8 @@ export default function RepairLogs() {
       setIsEditModalOpen(false);
       fetchRepairTasks();
       fetchSpareParts(); // Refresh spare parts list to show updated quantities
+
+      return result;
     } catch (err) {
       console.error("Error in handleEditSubmit:", err);
       toast.error("An unexpected error occurred");
@@ -698,6 +708,7 @@ export default function RepairLogs() {
         selectedSpareParts={selectedSpareParts}
         handleSparePartQuantityChange={handleSparePartQuantityChange}
         handleRemoveSparePart={handleRemoveSparePart}
+        user={currentUser} // เพิ่ม user prop
       />
 
       <DeleteModal

@@ -13,6 +13,7 @@ CREATE TABLE notifications (
 
 -- Create index for faster queries
 CREATE INDEX idx_notifications_recipient ON notifications(recipient_id);
+CREATE INDEX idx_notifications_task ON notifications(task_id);
 
 -- Create function to update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -37,21 +38,16 @@ CREATE POLICY "Users can view their own notifications"
     ON notifications FOR SELECT
     USING (auth.uid() = recipient_id);
 
-CREATE POLICY "Admins can create notifications"
+CREATE POLICY "System can create notifications"
     ON notifications FOR INSERT
     TO authenticated
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM auth.users
-            WHERE auth.users.id = auth.uid()
-            AND auth.users.raw_user_meta_data->>'role' = 'admin'
-        )
-    );
+    WITH CHECK (true);
 
--- Create function to notify admins of new tasks
-CREATE OR REPLACE FUNCTION notify_admins_new_task()
+-- Create function to notify new tasks
+CREATE OR REPLACE FUNCTION notify_new_task()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- แจ้งเตือนผู้ดูแลระบบ
     INSERT INTO notifications (recipient_id, title, message, type, task_id)
     SELECT 
         au.id,
@@ -61,21 +57,29 @@ BEGIN
         NEW.id
     FROM auth.users au
     WHERE au.raw_user_meta_data->>'role' = 'admin';
+
+    -- ถ้ามีการมอบหมายงาน แจ้งเตือนช่างที่ได้รับมอบหมาย
+    IF NEW.assigned_user_id IS NOT NULL THEN
+        INSERT INTO notifications (recipient_id, title, message, type, task_id)
+        VALUES (
+            NEW.assigned_user_id,
+            'ได้รับมอบหมายงานใหม่',
+            'คุณได้รับมอบหมายให้ซ่อม ' || NEW.device_name || ' - ' || NEW.issue,
+            'task_assigned',
+            NEW.id
+        );
+    END IF;
+
     RETURN NEW;
 END;
 $$ language 'plpgsql';
-
--- Create trigger for new task notifications
-CREATE TRIGGER notify_admins_new_task_trigger
-    AFTER INSERT ON repair_tasks
-    FOR EACH ROW
-    EXECUTE FUNCTION notify_admins_new_task();
 
 -- Create function to notify status changes
 CREATE OR REPLACE FUNCTION notify_status_change()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.status IN ('incomplete', 'complete') AND NEW.status != OLD.status THEN
+        -- แจ้งเตือนผู้ดูแลระบบและเจ้าหน้าที่
         INSERT INTO notifications (recipient_id, title, message, type, task_id)
         SELECT 
             au.id,
@@ -88,14 +92,26 @@ BEGIN
             'status_change',
             NEW.id
         FROM auth.users au
-        WHERE au.raw_user_meta_data->>'role' = 'admin';
+        WHERE au.raw_user_meta_data->>'role' IN ('admin', 'officer');
     END IF;
+
     RETURN NEW;
 END;
 $$ language 'plpgsql';
+
+-- Drop existing triggers if they exist
+DROP TRIGGER IF EXISTS notify_admins_new_task_trigger ON repair_tasks;
+DROP TRIGGER IF EXISTS notify_status_change_trigger ON repair_tasks;
+
+-- Create trigger for new task notifications
+CREATE TRIGGER notify_new_task_trigger
+    AFTER INSERT ON repair_tasks
+    FOR EACH ROW
+    EXECUTE FUNCTION notify_new_task();
 
 -- Create trigger for status change notifications
 CREATE TRIGGER notify_status_change_trigger
     AFTER UPDATE OF status ON repair_tasks
     FOR EACH ROW
+    WHEN (NEW.status IN ('incomplete', 'complete') AND NEW.status IS DISTINCT FROM OLD.status)
     EXECUTE FUNCTION notify_status_change();

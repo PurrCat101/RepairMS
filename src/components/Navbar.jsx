@@ -12,7 +12,8 @@ export default function Navbar({ navigation, onLogout, user }) {
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      // Subscribe to realtime notifications
+
+      // Subscribe to realtime notifications with conditions based on user role
       const channel = supabase
         .channel("notifications")
         .on(
@@ -21,10 +22,17 @@ export default function Navbar({ navigation, onLogout, user }) {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `recipient_id=eq.${user.id}`,
+            filter:
+              user.role === "admin" ? undefined : `recipient_id=eq.${user.id}`,
           },
           (payload) => {
-            setNotifications((prev) => [payload.new, ...prev]);
+            // Add notification only if it's new
+            setNotifications((prev) => {
+              // Check if notification already exists
+              const exists = prev.some((n) => n.id === payload.new.id);
+              if (exists) return prev;
+              return [payload.new, ...prev];
+            });
             setUnreadCount((prev) => prev + 1);
           }
         )
@@ -38,17 +46,46 @@ export default function Navbar({ navigation, onLogout, user }) {
 
   const fetchNotifications = async () => {
     try {
-      const { data, error } = await supabase
+      console.log("Fetching notifications for user:", {
+        userId: user.id,
+        role: user.role,
+      });
+
+      let query = supabase
         .from("notifications")
         .select("*")
-        .eq("recipient_id", user.id)
+        .or(
+          `recipient_id.eq.${user.id},and(recipient_id.is.not.null,for_role.eq.${user.role})`
+        )
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(50);
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
-      setNotifications(data);
-      setUnreadCount(data.filter((n) => !n.read).length);
+      console.log("Fetched notifications:", {
+        count: data?.length || 0,
+        notifications: data,
+      });
+
+      // กรองการแจ้งเตือนซ้ำออก (กรณี for_role และ recipient_id)
+      const uniqueNotifications =
+        data?.reduce((acc, curr) => {
+          const existingNotification = acc.find(
+            (n) =>
+              n.task_id === curr.task_id &&
+              n.type === curr.type &&
+              n.message === curr.message
+          );
+          if (!existingNotification) {
+            acc.push(curr);
+          }
+          return acc;
+        }, []) || [];
+
+      setNotifications(uniqueNotifications);
+      setUnreadCount(uniqueNotifications.filter((n) => !n.read).length);
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
     }
