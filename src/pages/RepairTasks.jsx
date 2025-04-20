@@ -6,6 +6,7 @@ import DeleteModal from "../components/RepairLogs/DeleteModal";
 import RepairGuideModal from "../components/RepairLogs/RepairManualModal";
 import RepairLogsTable from "../components/RepairLogs/RepairLogsTable";
 import toast, { Toaster } from "react-hot-toast";
+import NotificationService from "../services/NotificationService";
 
 export default function RepairLogs() {
   const [logs, setLogs] = useState([]);
@@ -550,7 +551,7 @@ export default function RepairLogs() {
       // Get assignment rule for this task title
       const { data: rule, error: ruleError } = await supabase
         .from("assignment_rules")
-        .select("*")
+        .select("*, users:assigned_user_id(full_name)")
         .eq("device_name", log.device_name)
         .single();
 
@@ -565,7 +566,7 @@ export default function RepairLogs() {
         return;
       }
 
-      // Check if technician already has 3 or more active tasks (not completed or incomplete)
+      // Check if technician already has 3 or more active tasks
       const { data: existingTasks, error: tasksError } = await supabase
         .from("repair_tasks")
         .select("id")
@@ -599,6 +600,15 @@ export default function RepairLogs() {
         toast.error("Failed to assign task");
         return;
       }
+
+      // สร้างการแจ้งเตือนให้ช่างที่ได้รับมอบหมายงาน
+      await NotificationService.createTaskAssignedNotification(
+        rule.assigned_user_id,
+        log.device_name,
+        log.issue,
+        log.id,
+        "ระบบ Auto Assign"
+      );
 
       // Add to repair history
       const { error: historyError } = await supabase

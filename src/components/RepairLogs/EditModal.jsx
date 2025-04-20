@@ -2,7 +2,7 @@ import React from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import RepairTaskPDF from "./RepairTaskPDF";
 import { toast } from "react-hot-toast";
-import { supabase } from "../../lib/supabase";
+import NotificationService from "../../services/NotificationService";
 
 export default function EditModal({
   isOpen,
@@ -22,25 +22,6 @@ export default function EditModal({
   user, // เพิ่ม prop user
 }) {
   if (!isOpen) return null;
-
-  // เพิ่มฟังก์ชันสำหรับสร้างการแจ้งเตือน
-  const addNotification = async (notification) => {
-    try {
-      console.log("Creating notification:", notification);
-      const { data, error } = await supabase
-        .from("notifications")
-        .insert(notification)
-        .select();
-
-      if (error) {
-        console.error("Error inserting notification:", error);
-      } else {
-        console.log("Successfully inserted notification:", data);
-      }
-    } catch (err) {
-      console.error("Error in addNotification:", err);
-    }
-  };
 
   const pdfData = {
     ...editForm,
@@ -72,63 +53,56 @@ export default function EditModal({
       if (result?.taskId) {
         console.log("Processing new task notification");
 
-        // สร้างการแจ้งเตือนเดียวสำหรับงานใหม่
-        await addNotification({
-          recipient_id: user.id, // ผู้สร้างงาน
-          title: "งานซ่อมใหม่",
-          message: `มีการเพิ่มงานซ่อมใหม่: ${editForm.device_name} - ${editForm.issue}`,
-          type: "new_task",
-          task_id: result.taskId,
-          read: false,
-          created_at: currentTime,
-          for_role: "admin", // ระบุว่าทุก admin สามารถเห็นได้
-        });
+        // สร้างการแจ้งเตือนสำหรับงานใหม่
+        await NotificationService.createNewTaskNotification(
+          user.id,
+          editForm.device_name,
+          editForm.issue,
+          result.taskId
+        );
 
-        // ถ้ามีการมอบหมายงาน แจ้งเตือนช่างเฉพาะคน
+        // ถ้ามีการมอบหมายงานตั้งแต่ตอนสร้างงาน
         if (editForm.assigned_user_id) {
-          console.log(
-            "Creating notification for assigned technician:",
-            editForm.assigned_user_id
+          await NotificationService.createTaskAssignedNotification(
+            editForm.assigned_user_id,
+            editForm.device_name,
+            editForm.issue,
+            result.taskId,
+            user.full_name || "ไม่ระบุชื่อ"
           );
-          await addNotification({
-            recipient_id: editForm.assigned_user_id,
-            title: "ได้รับมอบหมายงานใหม่",
-            message: `คุณได้รับมอบหมายให้ซ่อม ${editForm.device_name} - ${editForm.issue}`,
-            type: "task_assigned",
-            task_id: result.taskId,
-            read: false,
-            created_at: currentTime,
-            for_role: null, // การแจ้งเตือนส่วนตัว
-          });
         }
       } else if (selectedLog?.id) {
         // กรณีอัพเดทงาน
+        const isAssignmentChanged =
+          selectedLog.assigned_user_id !== editForm.assigned_user_id;
+
+        // ถ้ามีการเปลี่ยนแปลงการมอบหมายงาน และมีผู้รับมอบหมายใหม่
+        if (isAssignmentChanged && editForm.assigned_user_id) {
+          await NotificationService.createTaskAssignedNotification(
+            editForm.assigned_user_id,
+            editForm.device_name,
+            editForm.issue,
+            selectedLog.id,
+            user.full_name || "ไม่ระบุชื่อ"
+          );
+        }
+
+        // ถ้ามีการเปลี่ยนสถานะ
         if (
           selectedLog.status !== editForm.status &&
           (editForm.status === "completed" || editForm.status === "incompleted")
         ) {
-          const status =
-            editForm.status === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
           const userFullName =
             users.find((u) => u.id === user.id)?.full_name || "ไม่ระบุชื่อ";
-          const message = `งานซ่อม ${editForm.device_name} - ${editForm.issue} ถูกเปลี่ยนสถานะเป็น${status} โดย ${userFullName}`;
 
-          console.log("Status change detected:", {
-            oldStatus: selectedLog.status,
-            newStatus: editForm.status,
-            message,
-          });
-
-          await addNotification({
-            recipient_id: user.id, // ผู้เปลี่ยนสถานะ
-            title: "สถานะงานเปลี่ยนแปลง",
-            message,
-            type: "status_change",
-            task_id: selectedLog.id,
-            read: false,
-            created_at: currentTime,
-            for_role: "admin", // เฉพาะ admin เท่านั้นที่จะเห็นการแจ้งเตือนนี้
-          });
+          await NotificationService.createStatusChangeNotification(
+            user.id,
+            editForm.device_name,
+            editForm.issue,
+            editForm.status,
+            userFullName,
+            selectedLog.id
+          );
         }
       }
     } catch (err) {

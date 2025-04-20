@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 export const NotificationTypes = {
   NEW_TASK: "new_task",
   STATUS_CHANGE: "status_change",
+  TASK_ASSIGNED: "task_assigned",
 };
 
 class NotificationService {
@@ -150,6 +151,24 @@ class NotificationService {
       read: false,
       created_at: new Date().toISOString(),
       for_role: "admin",
+    });
+  }
+
+  async createTaskAssignedNotification(
+    technicianId,
+    deviceName,
+    issue,
+    taskId,
+    assignerName
+  ) {
+    return this.createNotification({
+      recipient_id: technicianId,
+      title: "ได้รับมอบหมายงานใหม่",
+      message: `คุณได้รับมอบหมายให้ซ่อม ${deviceName} - ${issue} โดย ${assignerName}`,
+      type: NotificationTypes.TASK_ASSIGNED,
+      task_id: taskId,
+      read: false,
+      created_at: new Date().toISOString(),
     });
   }
 }
