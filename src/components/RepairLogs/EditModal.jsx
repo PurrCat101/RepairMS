@@ -1,6 +1,7 @@
 import React from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import RepairTaskPDF from "./RepairTaskPDF";
+import { toast } from "react-hot-toast";
 
 export default function EditModal({
   isOpen,
@@ -27,6 +28,15 @@ export default function EditModal({
       part_number: sp.spare_part.part_number,
       quantity: sp.quantity,
     })),
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!editForm.device_name.trim() || !editForm.issue.trim()) {
+      toast.error("Device name and Issue are required");
+      return;
+    }
+    handleSubmit(e);
   };
 
   return (
@@ -57,11 +67,12 @@ export default function EditModal({
 
             {/* Form Content - Scrollable */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Device name
+                      <span className="text-red-600 ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -73,11 +84,13 @@ export default function EditModal({
                         })
                       }
                       className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Issue
+                      <span className="text-red-600 ml-1">*</span>
                     </label>
                     <textarea
                       value={editForm.issue}
@@ -86,6 +99,7 @@ export default function EditModal({
                       }
                       rows={3}
                       className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                      required
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -265,7 +279,7 @@ export default function EditModal({
                 </button>
                 <button
                   type="submit"
-                  onClick={handleSubmit}
+                  onClick={handleFormSubmit}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                 >
                   {selectedLog?.id ? "Update" : "Create"}
