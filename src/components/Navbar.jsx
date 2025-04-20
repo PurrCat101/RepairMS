@@ -1,11 +1,76 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Wrench, LogOut, User } from "lucide-react";
+import { Wrench, LogOut, User, Bell } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 export default function Navbar({ navigation, onLogout, user }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      // Subscribe to realtime notifications
+      const channel = supabase
+        .channel("notifications")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `recipient_id=eq.${user.id}`,
+          },
+          (payload) => {
+            setNotifications((prev) => [payload.new, ...prev]);
+            setUnreadCount((prev) => prev + 1);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("recipient_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      setNotifications(data);
+      setUnreadCount(data.filter((n) => !n.read).length);
+    } catch (error) {
+      console.error("Error fetching notifications:", error.message);
+    }
+  };
+
+  const markAsRead = async (notificationId) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", notificationId);
+
+      if (error) throw error;
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => prev - 1);
+    } catch (error) {
+      console.error("Error marking notification as read:", error.message);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -50,6 +115,54 @@ export default function Navbar({ navigation, onLogout, user }) {
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            <div className="relative group">
+              <div className="flex items-center cursor-pointer p-2 rounded-full hover:bg-gray-100">
+                <div className="relative">
+                  <Bell className="h-5 w-5 text-gray-600" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 text-xs flex items-center justify-center bg-red-500 text-white rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="absolute right-0 w-80 mt-2 py-2 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="px-4 py-2 border-b">
+                  <p className="text-sm font-medium text-gray-900">
+                    การแจ้งเตือน
+                  </p>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
+                          !notification.read ? "bg-blue-50" : ""
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <p className="text-sm font-medium text-gray-900">
+                          {notification.title}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(notification.created_at).toLocaleString(
+                            "th-TH"
+                          )}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-gray-500">
+                      ไม่มีการแจ้งเตือนใหม่
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             <div className="relative group">
               <div className="flex items-center cursor-pointer p-2 rounded-full hover:bg-gray-100">
                 <User className="h-5 w-5 text-gray-600" />
