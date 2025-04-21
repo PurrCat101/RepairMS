@@ -92,7 +92,7 @@ export default function Login({ onLogin }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input-with-icon w-full"
+                  className="input-with-icon w-full h-10"
                   placeholder="you@example.com"
                 />
               </div>
@@ -110,7 +110,7 @@ export default function Login({ onLogin }) {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-with-icon w-full"
+                  className="input-with-icon w-full h-10"
                 />
               </div>
             </div>

@@ -148,7 +148,7 @@ export default function Signup() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="input-with-icon w-full"
+                  className="input-with-icon w-full h-10"
                   placeholder="ชื่อ นามสกุล"
                 />
               </div>
@@ -160,7 +160,7 @@ export default function Signup() {
                 id="role"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full"
+                className="w-full h-10"
                 required
               >
                 <option value="technician">ช่างเทคนิค</option>
@@ -181,7 +181,7 @@ export default function Signup() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input-with-icon w-full"
+                  className="input-with-icon w-full h-10"
                   placeholder="you@example.com"
                 />
               </div>
@@ -199,7 +199,7 @@ export default function Signup() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-with-icon w-full"
+                  className="input-with-icon w-full h-10"
                 />
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function Signup() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input-with-icon w-full"
+                  className="input-with-icon w-full h-10"
                 />
               </div>
             </div>
