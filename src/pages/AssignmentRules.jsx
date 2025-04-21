@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { Plus } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import DeleteModal from "../components/RepairLogs/DeleteModal";
+import DeleteModal from "../components/RepairTasks/DeleteModal";
 
 export default function AssignmentRules() {
   const [rules, setRules] = useState([]);

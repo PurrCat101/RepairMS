@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import FilterSection from "../components/RepairLogs/FilterSection";
-import RepairLogsTable from "../components/RepairLogs/RepairLogsTable";
-import RepairGuideModal from "../components/RepairLogs/RepairManualModal";
-import EditModal from "../components/RepairLogs/EditModal";
-import DeleteModal from "../components/RepairLogs/DeleteModal";
+import FilterSection from "../components/RepairTasks/FilterSection";
+import RepairTasksTable from "../components/RepairTasks/RepairTasksTable";
+import RepairGuideModal from "../components/RepairTasks/RepairManualModal";
+import EditModal from "../components/RepairTasks/EditModal";
+import DeleteModal from "../components/RepairTasks/DeleteModal";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function RepairHistory() {
@@ -348,7 +348,7 @@ export default function RepairHistory() {
           clearFilters={clearFilters}
         />
 
-        <RepairLogsTable
+        <RepairTasksTable
           logs={logs}
           users={users}
           onRowClick={handleRowClick}

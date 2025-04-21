@@ -93,26 +93,26 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center">
-            <Wrench className="h-8 w-8 text-white" />
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-500 flex items-center justify-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
+            <Wrench className="h-10 w-10 text-white" />
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          ลงทะเบียนใช้งานระบบ
+        <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900 drop-shadow-sm">
+          RepairMS
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 font-medium">
           Repair Management System
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+        <div className="bg-white py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 backdrop-blur-lg bg-opacity-80">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-xl bg-red-50 p-4 animate-fade-in">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <AlertCircle className="h-5 w-5 text-red-400" />
@@ -125,7 +125,7 @@ export default function Signup() {
             )}
 
             {success && (
-              <div className="rounded-md bg-green-50 p-4">
+              <div className="rounded-xl bg-green-50 p-4 animate-fade-in">
                 <div className="flex">
                   <div className="ml-3">
                     <p className="text-sm text-green-700">
@@ -137,15 +137,10 @@ export default function Signup() {
             )}
 
             <div>
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                ชื่อ-นามสกุล
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+              <label htmlFor="fullName">ชื่อ-นามสกุล</label>
+              <div className="input-icon-wrapper">
+                <div className="input-icon">
+                  <User className="h-5 w-5" />
                 </div>
                 <input
                   id="fullName"
@@ -153,44 +148,32 @@ export default function Signup() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10 block w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-with-icon w-full"
                   placeholder="ชื่อ นามสกุล"
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
+              <label htmlFor="role">บทบาท</label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full"
+                required
               >
-                บทบาท
-              </label>
-              <div className="mt-1">
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="block w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                >
-                  <option value="technician">ช่างเทคนิค</option>
-                  <option value="officer">เจ้าหน้าที่</option>
-                  <option value="admin">ผู้ดูแลระบบ</option>
-                </select>
-              </div>
+                <option value="technician">ช่างเทคนิค</option>
+                <option value="officer">เจ้าหน้าที่</option>
+                <option value="admin">ผู้ดูแลระบบ</option>
+              </select>
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                อีเมล
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+              <label htmlFor="email">อีเมล</label>
+              <div className="input-icon-wrapper">
+                <div className="input-icon">
+                  <Mail className="h-5 w-5" />
                 </div>
                 <input
                   id="email"
@@ -198,22 +181,17 @@ export default function Signup() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 block w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-with-icon w-full"
                   placeholder="you@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                รหัสผ่าน
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+              <label htmlFor="password">รหัสผ่าน</label>
+              <div className="input-icon-wrapper">
+                <div className="input-icon">
+                  <Lock className="h-5 w-5" />
                 </div>
                 <input
                   id="password"
@@ -221,21 +199,16 @@ export default function Signup() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 block w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-with-icon w-full"
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                ยืนยันรหัสผ่าน
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+              <label htmlFor="confirmPassword">ยืนยันรหัสผ่าน</label>
+              <div className="input-icon-wrapper">
+                <div className="input-icon">
+                  <Lock className="h-5 w-5" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -243,7 +216,7 @@ export default function Signup() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 block w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-with-icon w-full"
                 />
               </div>
             </div>
@@ -252,8 +225,10 @@ export default function Signup() {
               <button
                 type="submit"
                 disabled={isLoading || success}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                  isLoading || success ? "opacity-50 cursor-not-allowed" : ""
+                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-200 ${
+                  isLoading || success
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:scale-[1.02]"
                 }`}
               >
                 {isLoading ? "กำลังลงทะเบียน..." : "ลงทะเบียน"}
@@ -263,7 +238,7 @@ export default function Signup() {
             <div className="text-sm text-center">
               <Link
                 to="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
               >
                 มีบัญชีอยู่แล้ว? เข้าสู่ระบบ
               </Link>
