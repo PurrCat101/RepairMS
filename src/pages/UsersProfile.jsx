@@ -206,7 +206,7 @@ export default function UsersPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(user.created_at).toLocaleDateString("th-TH")}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                   <button
                     onClick={() => {
                       setEditingUser(user);
