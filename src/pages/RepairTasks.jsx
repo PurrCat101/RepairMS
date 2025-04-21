@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import FilterSection from "../components/RepairLogs/FilterSection";
-import EditModal from "../components/RepairLogs/EditModal";
-import DeleteModal from "../components/RepairLogs/DeleteModal";
-import RepairGuideModal from "../components/RepairLogs/RepairManualModal";
-import RepairLogsTable from "../components/RepairLogs/RepairLogsTable";
+import FilterSection from "../components/RepairTasks/FilterSection";
+import EditModal from "../components/RepairTasks/EditModal";
+import DeleteModal from "../components/RepairTasks/DeleteModal";
+import RepairGuideModal from "../components/RepairTasks/RepairManualModal";
+import RepairTasksTable from "../components/RepairTasks/RepairTasksTable";
 import toast, { Toaster } from "react-hot-toast";
 import NotificationService from "../services/NotificationService";
 
-export default function RepairLogs() {
+export default function RepairTasks() {
   const [logs, setLogs] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -36,13 +36,11 @@ export default function RepairLogs() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    // เอา fetchUsers และ fetchSpareParts ออกมาจาก fetchCurrentUser เพื่อให้ทำงานแยกกัน
     fetchCurrentUser();
     fetchUsers();
     fetchSpareParts();
   }, []);
 
-  // เพิ่ม useEffect ใหม่เพื่อดึงข้อมูล repair tasks เมื่อ currentUser พร้อม
   useEffect(() => {
     if (currentUser) {
       fetchRepairTasksInitial();
@@ -87,8 +85,6 @@ export default function RepairLogs() {
         .select("*")
         .not("status", "in", "(completed,incompleted)")
         .order("created_at", { ascending: false });
-
-      // Filter for technician role
       if (currentUser?.role === "technician") {
         query = query.eq("assigned_user_id", currentUser.id);
       }
@@ -693,7 +689,7 @@ export default function RepairLogs() {
           clearFilters={clearFilters}
         />
 
-        <RepairLogsTable
+        <RepairTasksTable
           logs={logs}
           users={users}
           onRowClick={handleRowClick}
@@ -718,7 +714,7 @@ export default function RepairLogs() {
         selectedSpareParts={selectedSpareParts}
         handleSparePartQuantityChange={handleSparePartQuantityChange}
         handleRemoveSparePart={handleRemoveSparePart}
-        user={currentUser} // เพิ่ม user prop
+        user={currentUser}
       />
 
       <DeleteModal
