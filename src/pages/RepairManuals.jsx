@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import AddRepairManual from "../components/RepairManuals/AddRepairManual";
 import EditRepairManual from "../components/RepairManuals/EditRepairManual";
-import { X } from "lucide-react";
+import { X, Search, Book, Tool, Package } from "lucide-react";
 
 function RepairGuide() {
   const [guides, setGuides] = useState([]);
@@ -67,35 +67,19 @@ function RepairGuide() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[80vh]">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <p className="text-gray-500">Loading repair manuals...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+      <div className="max-w-4xl mx-auto mt-8 p-6 bg-red-50 border-l-4 border-red-500 rounded-lg">
         <div className="flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold flex items-center">
           <svg
-            className="w-6 h-6 mr-2"
+            className="w-6 h-6 text-red-500 mr-3"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -104,14 +88,28 @@ function RepairGuide() {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
+          <h3 className="text-lg font-medium text-red-800">
+            Error Loading Data
+          </h3>
+        </div>
+        <p className="mt-2 text-red-700">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 className="text-3xl font-bold flex items-center text-gray-900">
+          <Book className="w-8 h-8 mr-3 text-blue-500" />
           Repair Manuals
         </h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center"
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center shadow-sm"
         >
           <svg
             className="w-5 h-5 mr-2"
@@ -130,117 +128,144 @@ function RepairGuide() {
         </button>
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
+      <div className="mb-8">
+        <div className="relative max-w-xl mx-auto">
           <input
             type="text"
             placeholder="Search by device name or issue..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
           />
-          <svg
-            className="absolute right-3 top-2.5 w-5 h-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
         </div>
       </div>
 
-      {filteredGuides.map((guide) => (
-        <div
-          key={guide.id}
-          className="bg-white rounded-lg shadow-md mb-6 p-6 border border-gray-200"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-2xl font-semibold text-blue-600">
-              {guide.device_name}
-            </h2>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => {
-                  setSelectedGuide(guide);
-                  setShowEditModal(true);
-                }}
-                className="text-gray-600 hover:text-blue-600 p-1"
-                title="Edit"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedGuide(guide);
-                  setShowDeleteDialog(true);
-                }}
-                className="text-gray-600 hover:text-red-600 p-1"
-                title="Delete"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredGuides.map((guide) => (
+          <div
+            key={guide.id}
+            className="bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200"
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                  <Tool className="w-5 h-5 mr-2 text-blue-500" />
+                  {guide.device_name}
+                </h2>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setSelectedGuide(guide);
+                      setShowEditModal(true);
+                    }}
+                    className="text-gray-400 hover:text-blue-500 transition-colors duration-200"
+                    title="Edit"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedGuide(guide);
+                      setShowDeleteDialog(true);
+                    }}
+                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                    title="Delete"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-lg text-red-600 font-medium flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-red-100">
+                    Issue
+                  </span>
+                  {guide.issue}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center">
+                    <Tool className="w-4 h-4 mr-2 text-gray-500" />
+                    Repair Steps
+                  </h3>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    {guide.steps.steps.slice(0, 3).map((step, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="font-medium mr-2">{index + 1}.</span>
+                        <span className="line-clamp-2">{step}</span>
+                      </li>
+                    ))}
+                    {guide.steps.steps.length > 3 && (
+                      <li className="text-blue-500 text-sm">
+                        +{guide.steps.steps.length - 3} more steps...
+                      </li>
+                    )}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center">
+                    <Package className="w-4 h-4 mr-2 text-gray-500" />
+                    Required Parts
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {guide.parts.parts.map((part, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                      >
+                        {part.name} ({part.quantity})
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className="text-xl text-red-600 mb-6">Issue: {guide.issue}</div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Repair Steps:</h3>
-            <ul className="space-y-2">
-              {guide.steps.steps.map((step, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="font-medium mr-2">{index + 1}.</span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ul>
+      {filteredGuides.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <div className="flex justify-center mb-4">
+            <Search className="w-12 h-12 text-gray-400" />
           </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Required Parts:</h3>
-            <div className="flex flex-wrap gap-2">
-              {guide.parts.parts.map((part, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 rounded-full text-blue-600 bg-blue-50 border border-blue-200"
-                >
-                  {part.name} ({part.quantity})
-                </span>
-              ))}
-            </div>
-          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No repair manuals found
+          </h3>
+          <p className="text-gray-500">
+            Try adjusting your search terms or add a new manual
+          </p>
         </div>
-      ))}
+      )}
 
       {showAddModal && (
         <AddRepairManual
@@ -268,24 +293,29 @@ function RepairGuide() {
       )}
 
       {showDeleteDialog && selectedGuide && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Confirm Delete</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Confirm Delete
+              </h2>
               <button
                 onClick={() => {
                   setShowDeleteDialog(false);
                   setSelectedGuide(null);
                 }}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            <p className="mb-6 text-gray-700">
+            <p className="mb-6 text-gray-600">
               Are you sure you want to delete the repair manual for "
-              {selectedGuide.device_name}"? This action cannot be undone.
+              <span className="font-medium text-gray-900">
+                {selectedGuide.device_name}
+              </span>
+              "? This action cannot be undone.
             </p>
 
             <div className="flex justify-end space-x-3">
@@ -294,13 +324,13 @@ function RepairGuide() {
                   setShowDeleteDialog(false);
                   setSelectedGuide(null);
                 }}
-                className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
               >
                 Delete
               </button>
