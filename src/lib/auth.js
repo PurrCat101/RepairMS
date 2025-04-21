@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from "./supabase";
 
 export async function signIn(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -14,6 +14,30 @@ export async function signOut() {
 }
 
 export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    // ดึงข้อมูล user profile จากตาราง users_profile
+    const { data: userProfile, error } = await supabase
+      .from("users_profile")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+
+    return {
+      ...user,
+      ...userProfile,
+    };
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
+  }
 }

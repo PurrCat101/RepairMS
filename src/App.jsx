@@ -55,12 +55,9 @@ function App() {
         // ตรวจสอบ session จาก Supabase
         const currentUser = await getCurrentUser();
         if (currentUser) {
-          const userData = {
-            ...currentUser,
-            role: currentUser.user_metadata?.role || "user",
-          };
-          setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
+          // ใช้ค่า role จาก users_profile โดยตรง
+          setUser(currentUser);
+          localStorage.setItem("user", JSON.stringify(currentUser));
         } else if (!storedUser) {
           setUser(null);
           localStorage.removeItem("user");
