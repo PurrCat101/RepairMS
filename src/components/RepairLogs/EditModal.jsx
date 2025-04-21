@@ -112,14 +112,14 @@ export default function EditModal({
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
 
       <div className="fixed inset-0 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            {/* Header - Fixed at top */}
-            <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 rounded-t-xl flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="relative bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] w-full max-w-2xl max-h-[90vh] flex flex-col transform transition-all ease-in-out duration-300 scale-100">
+            {/* Header */}
+            <div className="sticky top-0 bg-white px-8 py-6 border-b border-gray-100 rounded-t-2xl flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-gray-800">
                 {selectedLog?.id ? "Edit Repair Log" : "Add New Repair Log"}
               </h2>
               {selectedLog?.id && (
@@ -131,14 +131,14 @@ export default function EditModal({
               )}
             </div>
 
-            {/* Form Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              <form onSubmit={handleFormSubmit} className="space-y-6">
+            {/* Form Content */}
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <form onSubmit={handleFormSubmit} className="space-y-8">
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Device name
-                      <span className="text-red-600 ml-1">*</span>
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -149,14 +149,14 @@ export default function EditModal({
                           device_name: e.target.value,
                         })
                       }
-                      className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Issue
-                      <span className="text-red-600 ml-1">*</span>
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <textarea
                       value={editForm.issue}
@@ -164,13 +164,13 @@ export default function EditModal({
                         setEditForm({ ...editForm, issue: e.target.value })
                       }
                       rows={3}
-                      className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Status
                       </label>
                       <select
@@ -178,7 +178,7 @@ export default function EditModal({
                         onChange={(e) =>
                           setEditForm({ ...editForm, status: e.target.value })
                         }
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 bg-white"
                       >
                         <option value="pending">Pending</option>
                         <option value="in_progress">In Progress</option>
@@ -187,7 +187,7 @@ export default function EditModal({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Priority
                       </label>
                       <select
@@ -195,7 +195,7 @@ export default function EditModal({
                         onChange={(e) =>
                           setEditForm({ ...editForm, priority: e.target.value })
                         }
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 bg-white"
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -204,7 +204,7 @@ export default function EditModal({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Assigned To
                     </label>
                     <select
@@ -215,7 +215,7 @@ export default function EditModal({
                           assigned_user_id: e.target.value,
                         })
                       }
-                      className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 bg-white"
                     >
                       <option value="">Unassigned</option>
                       {users
@@ -229,7 +229,7 @@ export default function EditModal({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
                       Spare Parts
                     </label>
                     <div className="flex items-center space-x-2 mb-4">
@@ -238,10 +238,10 @@ export default function EditModal({
                         value={sparePartSearch}
                         onChange={(e) => setSparePartSearch(e.target.value)}
                         placeholder="Search spare parts..."
-                        className="flex-1 border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                       />
                     </div>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                       <div className="max-h-40 overflow-y-auto">
                         {spareParts
                           .filter((part) =>
@@ -256,9 +256,9 @@ export default function EditModal({
                             return (
                               <div
                                 key={part.id}
-                                className={`flex items-center justify-between p-3 border-b border-gray-100 hover:bg-gray-50 ${
+                                className={`flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50/80 transition-colors ${
                                   isSelected
-                                    ? "bg-gray-100 cursor-not-allowed opacity-60"
+                                    ? "bg-gray-50/90 cursor-not-allowed opacity-60"
                                     : "cursor-pointer"
                                 }`}
                                 onClick={() => {
@@ -268,17 +268,19 @@ export default function EditModal({
                                 }}
                               >
                                 <div>
-                                  <div className="font-medium">{part.name}</div>
+                                  <div className="font-medium text-gray-800">
+                                    {part.name}
+                                  </div>
                                   <div className="text-sm text-gray-500">
                                     {part.part_number}
                                   </div>
                                 </div>
                                 <div className="flex items-center">
-                                  <div className="text-sm text-gray-500 mr-2">
+                                  <div className="text-sm text-gray-600 mr-3 font-medium">
                                     ${part.price}
                                   </div>
                                   {isSelected && (
-                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    <span className="text-xs bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-medium">
                                       Added
                                     </span>
                                   )}
@@ -288,21 +290,21 @@ export default function EditModal({
                           })}
                       </div>
                     </div>
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4 space-y-3">
                       {selectedSpareParts.map((sp) => (
                         <div
                           key={sp.spare_part_id}
-                          className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200"
+                          className="flex items-center justify-between bg-gray-50/50 p-4 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors"
                         >
                           <div>
-                            <div className="font-medium">
+                            <div className="font-medium text-gray-800">
                               {sp.spare_part.name}
                             </div>
                             <div className="text-sm text-gray-500">
                               {sp.spare_part.part_number}
                             </div>
                           </div>
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-4">
                             <input
                               type="number"
                               min="1"
@@ -313,7 +315,7 @@ export default function EditModal({
                                   parseInt(e.target.value)
                                 )
                               }
-                              className="w-20 border-gray-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500"
+                              className="w-24 border border-gray-200 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                               onClick={(e) => e.stopPropagation()}
                             />
                             <button
@@ -323,7 +325,7 @@ export default function EditModal({
                                 e.stopPropagation();
                                 handleRemoveSparePart(sp.spare_part_id);
                               }}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-gray-400 hover:text-red-500 transition-colors duration-200"
                             >
                               Remove
                             </button>
@@ -336,20 +338,20 @@ export default function EditModal({
               </form>
             </div>
 
-            {/* Footer - Fixed at bottom */}
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-xl">
-              <div className="flex justify-end space-x-3">
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-gray-50 px-8 py-5 border-t border-gray-100 rounded-b-2xl">
+              <div className="flex justify-end space-x-4">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+                  className="px-6 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   onClick={handleFormSubmit}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                 >
                   {selectedLog?.id ? "Update" : "Create"}
                 </button>
