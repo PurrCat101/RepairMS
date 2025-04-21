@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import AddRepairManual from "../components/RepairManuals/AddRepairManual";
 import EditRepairManual from "../components/RepairManuals/EditRepairManual";
+import RepairManualDetailsModal from "../components/RepairManuals/RepairManualDetailsModal";
 import { X, Book } from "lucide-react";
 
 function RepairGuide() {
@@ -14,6 +15,8 @@ function RepairGuide() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedGuide, setSelectedGuide] = useState(null);
+  const [selectedGuideForDetails, setSelectedGuideForDetails] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRepairGuides();
@@ -136,7 +139,14 @@ function RepairGuide() {
         {filteredGuides.map((guide) => (
           <div
             key={guide.id}
-            className="bg-white overflow-hidden shadow rounded-lg"
+            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer transition hover:shadow-lg"
+            onClick={(e) => {
+              // Prevent opening details modal when clicking edit or delete buttons
+              if (!e.target.closest("button")) {
+                setSelectedGuideForDetails(guide);
+                setIsDetailsModalOpen(true);
+              }
+            }}
           >
             <div className="p-5">
               <div className="flex items-center justify-between">
@@ -299,6 +309,15 @@ function RepairGuide() {
           </div>
         </div>
       )}
+
+      <RepairManualDetailsModal
+        guide={selectedGuideForDetails}
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedGuideForDetails(null);
+        }}
+      />
     </div>
   );
 }

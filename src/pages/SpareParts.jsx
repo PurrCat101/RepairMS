@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { Package, X } from "lucide-react";
 import AddEditPartModal from "../components/SpareParts/AddEditPartModal";
+import PartDetailsModal from "../components/SpareParts/PartDetailsModal";
 
 export default function SpareParts() {
   const [parts, setParts] = useState([]);
@@ -21,6 +22,8 @@ export default function SpareParts() {
   const [editingPart, setEditingPart] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [partToDelete, setPartToDelete] = useState(null);
+  const [selectedPart, setSelectedPart] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSpareParts();
@@ -198,7 +201,11 @@ export default function SpareParts() {
         {filteredParts.map((part) => (
           <div
             key={part.id}
-            className="bg-white overflow-hidden shadow rounded-lg"
+            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer transition hover:shadow-lg"
+            onClick={() => {
+              setSelectedPart(part);
+              setIsDetailsModalOpen(true);
+            }}
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -324,6 +331,15 @@ export default function SpareParts() {
           </div>
         </div>
       )}
+
+      <PartDetailsModal
+        part={selectedPart}
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedPart(null);
+        }}
+      />
     </div>
   );
 }
