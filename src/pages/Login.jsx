@@ -52,12 +52,10 @@ export default function Login({ onLogin }) {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-500 flex items-center justify-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
-            <Wrench className="h-10 w-10 text-white" />
-          </div>
+          <img src="/depo.png" alt="RepairMS Logo" className="h-24 w-auto" />
         </div>
         <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900 drop-shadow-sm">
-          RepairMS
+          ระบบจัดการงานซ่อม
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 font-medium">
           Repair Management System

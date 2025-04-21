@@ -87,7 +87,7 @@ export default function Navbar({ navigation, onLogout, user }) {
         <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
-              <span className="text-xl font-bold text-gray-900">RepairMS</span>
+              <img src="/depo.png" alt="RepairMS Logo" className="h-8 w-auto" />
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {
