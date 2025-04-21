@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { Package, X } from "lucide-react";
+import AddEditPartModal from "../components/SpareParts/AddEditPartModal";
 
 export default function SpareParts() {
   const [parts, setParts] = useState([]);
@@ -259,285 +260,26 @@ export default function SpareParts() {
         ))}
       </div>
 
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Add New Spare Part</h2>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+      <AddEditPartModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddPart}
+        part={newPart}
+        setPart={setNewPart}
+        mode="add"
+      />
 
-            <form onSubmit={handleAddPart}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newPart.name}
-                    onChange={(e) =>
-                      setNewPart({ ...newPart, name: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Description
-                  </label>
-                  <textarea
-                    value={newPart.description}
-                    onChange={(e) =>
-                      setNewPart({ ...newPart, description: e.target.value })
-                    }
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    NSN
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newPart.nsn}
-                    onChange={(e) =>
-                      setNewPart({ ...newPart, nsn: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Part Number
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newPart.part_number}
-                    onChange={(e) =>
-                      setNewPart({ ...newPart, part_number: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Quantity
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={newPart.quantity}
-                    onChange={(e) =>
-                      setNewPart({
-                        ...newPart,
-                        quantity: parseInt(e.target.value),
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01"
-                    value={newPart.price}
-                    onChange={(e) =>
-                      setNewPart({
-                        ...newPart,
-                        price: parseFloat(e.target.value),
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                >
-                  Add Part
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {isEditModalOpen && editingPart && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Edit Spare Part</h2>
-              <button
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                  setEditingPart(null);
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleEditPart}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingPart.name}
-                    onChange={(e) =>
-                      setEditingPart({ ...editingPart, name: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Description
-                  </label>
-                  <textarea
-                    value={editingPart.description}
-                    onChange={(e) =>
-                      setEditingPart({
-                        ...editingPart,
-                        description: e.target.value,
-                      })
-                    }
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    NSN
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingPart.nsn}
-                    onChange={(e) =>
-                      setEditingPart({ ...editingPart, nsn: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Part Number
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingPart.part_number}
-                    onChange={(e) =>
-                      setEditingPart({
-                        ...editingPart,
-                        part_number: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Quantity
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={editingPart.quantity}
-                    onChange={(e) =>
-                      setEditingPart({
-                        ...editingPart,
-                        quantity: parseInt(e.target.value),
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01"
-                    value={editingPart.price}
-                    onChange={(e) =>
-                      setEditingPart({
-                        ...editingPart,
-                        price: parseFloat(e.target.value),
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setEditingPart(null);
-                  }}
-                  className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                >
-                  Update Part
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AddEditPartModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingPart(null);
+        }}
+        onSubmit={handleEditPart}
+        part={editingPart || {}}
+        setPart={setEditingPart}
+        mode="edit"
+      />
 
       {isDeleteModalOpen && partToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
