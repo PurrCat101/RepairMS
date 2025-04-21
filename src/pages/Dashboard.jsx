@@ -160,7 +160,7 @@ export default function Dashboard() {
         })
       );
 
-      setMonthlyStats(monthlyStatsArray.slice(-6)); // Last 6 months
+      setMonthlyStats(monthlyStatsArray.slice(-6));
       setError(null);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
@@ -376,10 +376,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* New Repair Jobs Table Section */}
+      {/* Repair Tasks Table Section */}
       <div className="mt-8 bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Repair Jobs List</h2>
+          <h2 className="text-lg font-semibold">Repair Tasks</h2>
           <div className="relative">
             <input
               type="text"
