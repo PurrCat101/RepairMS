@@ -224,11 +224,13 @@ export default function EditModal({
                       className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-indigo-500"
                     >
                       <option value="">Unassigned</option>
-                      {users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.full_name}
-                        </option>
-                      ))}
+                      {users
+                        .filter((user) => user.role === "technician")
+                        .map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.full_name}
+                          </option>
+                        ))}
                     </select>
                   </div>
 
