@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import AddRepairManual from "../components/AddRepairManual";
-import EditRepairManual from "../components/EditRepairManual";
+import AddRepairManual from "../components/RepairManuals/AddRepairManual";
+import EditRepairManual from "../components/RepairManuals/EditRepairManual";
 import { X } from "lucide-react";
 
 function RepairGuide() {
