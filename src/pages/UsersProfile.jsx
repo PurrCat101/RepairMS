@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import UserFormModal from "../components/UserFormModal";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -45,9 +46,7 @@ export default function UsersPage() {
         throw error;
       }
 
-      // Update the user list with the newly added user
       setUsers((prevUsers) => [...prevUsers, ...data]);
-      // Clear the form fields
       setEmail("");
       setFullName("");
       setRole("");
@@ -69,7 +68,6 @@ export default function UsersPage() {
         throw error;
       }
 
-      // Remove the deleted user from the list
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -90,7 +88,6 @@ export default function UsersPage() {
         throw error;
       }
 
-      // Update the user list with the edited user
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === editingUser.id
@@ -98,7 +95,6 @@ export default function UsersPage() {
             : user
         )
       );
-      // Clear the form fields
       setEmail("");
       setFullName("");
       setRole("");
@@ -142,63 +138,37 @@ export default function UsersPage() {
       </h1>
       <div className="flex justify-end">
         <button
-          onClick={() => setShowForm(true)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 my-4 "
+          onClick={() => {
+            setEditingUser(null);
+            setEmail("");
+            setFullName("");
+            setRole("");
+            setShowForm(true);
+          }}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 my-4"
         >
           Add User
         </button>
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-xl mb-4">
-              {editingUser ? "Edit User" : "Add New User"}
-            </h2>
-            <form onSubmit={editingUser ? updateUser : addUser}>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border p-2 mb-2 w-full"
-              />
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="border p-2 mb-2 w-full"
-              />
-              <input
-                type="text"
-                placeholder="Role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-                className="border p-2 mb-2 w-full"
-              />
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingUser(null);
-                  }}
-                  className="bg-gray-500 text-white p-2 mr-2"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="bg-blue-500 text-white p-2">
-                  {editingUser ? "Update User" : "Add User"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <UserFormModal
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setEditingUser(null);
+          setEmail("");
+          setFullName("");
+          setRole("");
+        }}
+        onSubmit={editingUser ? updateUser : addUser}
+        editingUser={editingUser}
+        email={email}
+        setEmail={setEmail}
+        fullName={fullName}
+        setFullName={setFullName}
+        role={role}
+        setRole={setRole}
+      />
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
