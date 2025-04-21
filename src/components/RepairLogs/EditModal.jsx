@@ -1,8 +1,7 @@
 import React from "react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import RepairTaskPDF from "./RepairTaskPDF";
 import { toast } from "react-hot-toast";
 import NotificationService from "../../services/NotificationService";
+import ExportPDFButton from "./ExportPDFButton";
 
 export default function EditModal({
   isOpen,
@@ -113,7 +112,6 @@ export default function EditModal({
 
   return (
     <div className="fixed inset-0 z-50">
-      {/* Backdrop - removed blur for better performance */}
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
 
       <div className="fixed inset-0 overflow-y-auto">
@@ -125,15 +123,11 @@ export default function EditModal({
                 {selectedLog?.id ? "Edit Repair Log" : "Add New Repair Log"}
               </h2>
               {selectedLog?.id && (
-                <PDFDownloadLink
-                  document={<RepairTaskPDF data={pdfData} users={users} />}
-                  fileName={`repair-task-${selectedLog.id}.pdf`}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                >
-                  {({ blob, url, loading, error }) =>
-                    loading ? "Loading document..." : "Export PDF"
-                  }
-                </PDFDownloadLink>
+                <ExportPDFButton
+                  pdfData={pdfData}
+                  users={users}
+                  taskId={selectedLog.id}
+                />
               )}
             </div>
 
