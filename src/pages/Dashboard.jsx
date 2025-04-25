@@ -44,7 +44,7 @@ export default function Dashboard() {
   const [dateField, setDateField] = useState("updated_at");
   const [searchTerm, setSearchTerm] = useState("");
   const [repairStats, setRepairStats] = useState({
-    active: 0,
+    in_progress: 0,
     completed: 0,
     pending: 0,
     total: 0,
@@ -111,7 +111,8 @@ export default function Dashboard() {
 
       // Calculate repair statistics
       const stats = {
-        active: repairLogs.filter((log) => log.status === "in_progress").length,
+        in_progress: repairLogs.filter((log) => log.status === "in_progress")
+          .length,
         completed: repairLogs.filter((log) => log.status === "completed")
           .length,
         pending: repairLogs.filter((log) => log.status === "pending").length,
@@ -171,7 +172,7 @@ export default function Dashboard() {
   const stats = [
     {
       name: "In progress Repairs",
-      value: repairStats.active.toString(),
+      value: repairStats.in_progress.toString(),
       icon: Tool,
       change: "",
       changeType: "neutral",
