@@ -67,21 +67,21 @@ class DiscordNotificationService {
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  async sendToDiscord(message) {
+  async sendToDiscord(embed) {
     try {
       if (!this.webhookUrl) {
         console.error("Discord webhook URL is not configured");
         return;
       }
 
-      console.log("Sending to Discord:", message);
+      console.log("Sending to Discord:", embed);
       const response = await fetch(this.webhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: message,
+          embeds: [embed],
         }),
       });
 
@@ -100,8 +100,13 @@ class DiscordNotificationService {
 
   async testConnection() {
     try {
-      const message = "🔧 ทดสอบการเชื่อมต่อ Discord Webhook";
-      await this.sendToDiscord(message);
+      const embed = {
+        title: "🔧 ทดสอบการเชื่อมต่อ",
+        description: "ทดสอบการเชื่อมต่อ Discord Webhook",
+        color: 0x00ff00, // สีเขียว
+        timestamp: new Date().toISOString(),
+      };
+      await this.sendToDiscord(embed);
       return true;
     } catch (error) {
       console.error("Test connection failed:", error);
@@ -110,9 +115,24 @@ class DiscordNotificationService {
   }
 
   async sendNewTaskNotification(deviceName, issue) {
-    const datetime = this.formatDateTime();
-    const message = `🔔 งานซ่อมใหม่\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n⏰ เวลา: ${datetime}`;
-    return this.sendToDiscord(message);
+    const embed = {
+      title: "🔔 งานซ่อมใหม่",
+      color: 0x3498db, // สีฟ้า
+      fields: [
+        {
+          name: "📱 อุปกรณ์",
+          value: deviceName,
+          inline: true,
+        },
+        {
+          name: "🔧 ปัญหา",
+          value: issue,
+          inline: true,
+        },
+      ],
+      timestamp: new Date().toISOString(),
+    };
+    return this.sendToDiscord(embed);
   }
 
   async sendStatusChangeNotification(
@@ -122,12 +142,39 @@ class DiscordNotificationService {
     changerName,
     changerRole
   ) {
-    const datetime = this.formatDateTime();
     const statusEmoji = newStatus === "completed" ? "✅" : "❌";
     const statusThai =
       newStatus === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
-    const message = `${statusEmoji} สถานะงานเปลี่ยนแปลง\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n📝 สถานะใหม่: ${statusThai}\n👤 ดำเนินการโดย: ${changerName} \n⏰ เวลา: ${datetime}`;
-    return this.sendToDiscord(message);
+    const statusColor = newStatus === "completed" ? 0x2ecc71 : 0xe74c3c; // สีเขียวหรือแดง
+
+    const embed = {
+      title: `${statusEmoji} สถานะงานเปลี่ยนแปลง`,
+      color: statusColor,
+      fields: [
+        {
+          name: "📱 อุปกรณ์",
+          value: deviceName,
+          inline: true,
+        },
+        {
+          name: "🔧 ปัญหา",
+          value: issue,
+          inline: true,
+        },
+        {
+          name: "📝 สถานะใหม่",
+          value: statusThai,
+          inline: false,
+        },
+        {
+          name: "👤 ดำเนินการโดย",
+          value: `${changerName} (${changerRole})`,
+          inline: false,
+        },
+      ],
+      timestamp: new Date().toISOString(),
+    };
+    return this.sendToDiscord(embed);
   }
 
   async sendTaskAssignedNotification(
@@ -138,9 +185,34 @@ class DiscordNotificationService {
     technicianName,
     technicianRole
   ) {
-    const datetime = this.formatDateTime();
-    const message = `📋 การมอบหมายงานใหม่\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n👤 มอบหมายโดย: ${assignerName} (${assignerRole})\n🔨 ผู้รับผิดชอบ: ${technicianName} \n⏰ เวลา: ${datetime}`;
-    return this.sendToDiscord(message);
+    const embed = {
+      title: "📋 การมอบหมายงานใหม่",
+      color: 0xf1c40f, // สีเหลือง
+      fields: [
+        {
+          name: "📱 อุปกรณ์",
+          value: deviceName,
+          inline: true,
+        },
+        {
+          name: "🔧 ปัญหา",
+          value: issue,
+          inline: true,
+        },
+        {
+          name: "👤 มอบหมายโดย",
+          value: `${assignerName} (${assignerRole})`,
+          inline: false,
+        },
+        {
+          name: "🔨 ผู้รับผิดชอบ",
+          value: `${technicianName} (${technicianRole})`,
+          inline: false,
+        },
+      ],
+      timestamp: new Date().toISOString(),
+    };
+    return this.sendToDiscord(embed);
   }
 }
 
