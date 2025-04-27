@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import discordService from "./DiscordNotificationService";
 
 export const NotificationTypes = {
   NEW_TASK: "new_task",
@@ -121,6 +122,9 @@ class NotificationService {
 
   // Notification creators
   async createNewTaskNotification(creatorId, deviceName, issue, taskId) {
+    // ส่งการแจ้งเตือนไปยัง Discord
+    await discordService.sendNewTaskNotification(deviceName, issue);
+
     return this.createNotification({
       recipient_id: creatorId,
       title: "งานซ่อมใหม่",
@@ -141,6 +145,14 @@ class NotificationService {
     changerName,
     taskId
   ) {
+    // ส่งการแจ้งเตือนไปยัง Discord
+    await discordService.sendStatusChangeNotification(
+      deviceName,
+      issue,
+      newStatus,
+      changerName
+    );
+
     const status = newStatus === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
     return this.createNotification({
       recipient_id: changerId,
@@ -161,6 +173,14 @@ class NotificationService {
     taskId,
     assignerName
   ) {
+    // เปิดใช้งานการส่งแจ้งเตือนไปยัง Discord อีกครั้ง
+    await discordService.sendTaskAssignedNotification(
+      deviceName,
+      issue,
+      assignerName,
+      technicianId
+    );
+
     return this.createNotification({
       recipient_id: technicianId,
       title: "ได้รับมอบหมายงานใหม่",
