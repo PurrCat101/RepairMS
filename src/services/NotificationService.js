@@ -143,14 +143,16 @@ class NotificationService {
     issue,
     newStatus,
     changerName,
+    changerRole,
     taskId
   ) {
-    // ส่งการแจ้งเตือนไปยัง Discord
+    // ส่งการแจ้งเตือนไปยัง Discord พร้อมข้อมูลบทบาท
     await discordService.sendStatusChangeNotification(
       deviceName,
       issue,
       newStatus,
-      changerName
+      changerName,
+      changerRole
     );
 
     const status = newStatus === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
@@ -171,14 +173,18 @@ class NotificationService {
     deviceName,
     issue,
     taskId,
-    assignerName
+    assignerName,
+    assignerRole,
+    technicianName,
+    technicianRole
   ) {
-    // เปิดใช้งานการส่งแจ้งเตือนไปยัง Discord อีกครั้ง
     await discordService.sendTaskAssignedNotification(
       deviceName,
       issue,
       assignerName,
-      technicianId
+      assignerRole,
+      technicianName,
+      technicianRole
     );
 
     return this.createNotification({

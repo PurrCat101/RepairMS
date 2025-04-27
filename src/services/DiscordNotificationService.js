@@ -55,6 +55,18 @@ class DiscordNotificationService {
     }
   }
 
+  formatDateTime() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  }
+
   async sendToDiscord(message) {
     try {
       if (!this.webhookUrl) {
@@ -98,29 +110,36 @@ class DiscordNotificationService {
   }
 
   async sendNewTaskNotification(deviceName, issue) {
-    const message = `🔔 งานซ่อมใหม่\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}`;
+    const datetime = this.formatDateTime();
+    const message = `🔔 งานซ่อมใหม่\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n⏰ เวลา: ${datetime}`;
     return this.sendToDiscord(message);
   }
 
-  async sendStatusChangeNotification(deviceName, issue, newStatus, changerId) {
-    const changerRole = await this.getUserRole(changerId);
+  async sendStatusChangeNotification(
+    deviceName,
+    issue,
+    newStatus,
+    changerName,
+    changerRole
+  ) {
+    const datetime = this.formatDateTime();
     const statusEmoji = newStatus === "completed" ? "✅" : "❌";
     const statusThai =
       newStatus === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
-    const message = `${statusEmoji} สถานะงานเปลี่ยนแปลง\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n📝 สถานะใหม่: ${statusThai}\n👤 ดำเนินการโดย: ${changerRole}`;
+    const message = `${statusEmoji} สถานะงานเปลี่ยนแปลง\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n📝 สถานะใหม่: ${statusThai}\n👤 ดำเนินการโดย: ${changerName} \n⏰ เวลา: ${datetime}`;
     return this.sendToDiscord(message);
   }
 
   async sendTaskAssignedNotification(
     deviceName,
     issue,
-    assignerId,
-    technicianId
+    assignerName,
+    assignerRole,
+    technicianName,
+    technicianRole
   ) {
-    const assignerRole = await this.getUserRole(assignerId);
-    const technicianRole = await this.getUserRole(technicianId);
-
-    const message = `📋 การมอบหมายงานใหม่\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n👤 มอบหมายโดย: ${assignerRole}\n🔨 ผู้รับผิดชอบ: ${technicianRole}`;
+    const datetime = this.formatDateTime();
+    const message = `📋 การมอบหมายงานใหม่\n📱 อุปกรณ์: ${deviceName}\n🔧 ปัญหา: ${issue}\n👤 มอบหมายโดย: ${assignerName} (${assignerRole})\n🔨 ผู้รับผิดชอบ: ${technicianName} \n⏰ เวลา: ${datetime}`;
     return this.sendToDiscord(message);
   }
 }
