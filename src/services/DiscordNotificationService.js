@@ -122,12 +122,12 @@ class DiscordNotificationService {
         {
           name: "📱 อุปกรณ์",
           value: deviceName,
-          inline: true,
+          inline: false,
         },
         {
           name: "🔧 ปัญหา",
           value: issue,
-          inline: true,
+          inline: false,
         },
       ],
       timestamp: new Date().toISOString(),
@@ -140,7 +140,7 @@ class DiscordNotificationService {
     issue,
     newStatus,
     changerName,
-    changerRole // เปลี่ยนจาก changerId เป็น changerRole
+    changerRole
   ) {
     const statusEmoji = newStatus === "completed" ? "✅" : "❌";
     const statusThai =
@@ -154,12 +154,12 @@ class DiscordNotificationService {
         {
           name: "📱 อุปกรณ์",
           value: deviceName,
-          inline: true,
+          inline: false,
         },
         {
           name: "🔧 ปัญหา",
           value: issue,
-          inline: true,
+          inline: false,
         },
         {
           name: "📝 สถานะใหม่",
@@ -192,12 +192,12 @@ class DiscordNotificationService {
         {
           name: "📱 อุปกรณ์",
           value: deviceName,
-          inline: true,
+          inline: false,
         },
         {
           name: "🔧 ปัญหา",
           value: issue,
-          inline: true,
+          inline: false,
         },
         {
           name: "👤 มอบหมายโดย",
