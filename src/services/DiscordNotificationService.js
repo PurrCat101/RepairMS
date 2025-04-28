@@ -140,12 +140,12 @@ class DiscordNotificationService {
     issue,
     newStatus,
     changerName,
-    changerRole
+    changerRole // เปลี่ยนจาก changerId เป็น changerRole
   ) {
     const statusEmoji = newStatus === "completed" ? "✅" : "❌";
     const statusThai =
       newStatus === "completed" ? "เสร็จสิ้น" : "ไม่สามารถซ่อมได้";
-    const statusColor = newStatus === "completed" ? 0x2ecc71 : 0xe74c3c; // สีเขียวหรือแดง
+    const statusColor = newStatus === "completed" ? 0x2ecc71 : 0xe74c3c;
 
     const embed = {
       title: `${statusEmoji} สถานะงานเปลี่ยนแปลง`,
@@ -168,7 +168,7 @@ class DiscordNotificationService {
         },
         {
           name: "👤 ดำเนินการโดย",
-          value: `${changerName}`,
+          value: `${changerName} (${changerRole})`,
           inline: false,
         },
       ],

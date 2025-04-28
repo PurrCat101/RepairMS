@@ -94,12 +94,21 @@ export default function EditModal({
           const userFullName =
             users.find((u) => u.id === user.id)?.full_name || "ไม่ระบุชื่อ";
 
+          // แปลง role เป็นภาษาไทย
+          const roleMap = {
+            admin: "ผู้ดูแลระบบ",
+            officer: "เจ้าหน้าที่",
+            technician: "ช่างเทคนิค",
+          };
+          const userRole = roleMap[user.role] || "ไม่ระบุ";
+
           await NotificationService.createStatusChangeNotification(
             user.id,
             editForm.device_name,
             editForm.issue,
             editForm.status,
             userFullName,
+            userRole,
             selectedLog.id
           );
         }
