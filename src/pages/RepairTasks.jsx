@@ -547,7 +547,7 @@ export default function RepairTasks() {
       // Get assignment rule for this task title
       const { data: rule, error: ruleError } = await supabase
         .from("assignment_rules")
-        .select("*, users:assigned_user_id(full_name)")
+        .select("*, users:assigned_user_id(full_name, role)")
         .eq("device_name", log.device_name)
         .single();
 
@@ -597,13 +597,23 @@ export default function RepairTasks() {
         return;
       }
 
+      // แปลง role เป็นภาษาไทย
+      const roleMap = {
+        admin: "ผู้ดูแลระบบ",
+        officer: "เจ้าหน้าที่",
+        technician: "ช่างเทคนิค",
+      };
+
       // สร้างการแจ้งเตือนให้ช่างที่ได้รับมอบหมายงาน
       await NotificationService.createTaskAssignedNotification(
         rule.assigned_user_id,
         log.device_name,
         log.issue,
         log.id,
-        "ระบบ Auto Assign"
+        "ระบบ Auto Assign",
+        "ระบบ",
+        rule.users.full_name,
+        roleMap[rule.users.role] || "ไม่ระบุ"
       );
 
       // Add to repair history

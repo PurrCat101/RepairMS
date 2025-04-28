@@ -168,7 +168,7 @@ class DiscordNotificationService {
         },
         {
           name: "👤 ดำเนินการโดย",
-          value: `${changerName} (${changerRole})`,
+          value: `${changerName}`,
           inline: false,
         },
       ],
