@@ -4,12 +4,14 @@ import { LogOut, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import NotificationPopover from "./NotificationPopover";
 import NotificationService from "../services/NotificationService";
+import ConfirmModal from "./ConfirmModal";
 
 export default function Navbar({ navigation, onLogout, user }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -142,7 +144,7 @@ export default function Navbar({ navigation, onLogout, user }) {
               </div>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700"
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -151,6 +153,16 @@ export default function Navbar({ navigation, onLogout, user }) {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title="ยืนยันการออกจากระบบ"
+        message="คุณต้องการออกจากระบบใช่หรือไม่?"
+        confirmText="ออกจากระบบ"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+      />
     </nav>
   );
 }
