@@ -5,6 +5,8 @@ export const NotificationTypes = {
   NEW_TASK: "new_task",
   STATUS_CHANGE: "status_change",
   TASK_ASSIGNED: "task_assigned",
+  USER_UPDATED: "user_updated",
+  USER_DELETED: "user_deleted",
 };
 
 class NotificationService {
@@ -195,6 +197,60 @@ class NotificationService {
       task_id: taskId,
       read: false,
       created_at: new Date().toISOString(),
+    });
+  }
+
+  async createUserUpdateNotification(
+    updaterId,
+    email,
+    fullName,
+    role,
+    updaterName,
+    updaterRole
+  ) {
+    await discordService.sendUserUpdateNotification(
+      email,
+      fullName,
+      role,
+      updaterName,
+      updaterRole
+    );
+
+    return this.createNotification({
+      recipient_id: updaterId,
+      title: "อัปเดตข้อมูลผู้ใช้",
+      message: `ข้อมูลผู้ใช้ ${email} (${fullName}) ถูกอัปเดตโดย ${updaterName}`,
+      type: NotificationTypes.USER_UPDATED,
+      read: false,
+      created_at: new Date().toISOString(),
+      for_role: "admin",
+    });
+  }
+
+  async createUserDeleteNotification(
+    deleterId,
+    email,
+    fullName,
+    role,
+    deleterName,
+    deleterRole
+  ) {
+    await discordService.sendUserDeleteNotification(
+      email,
+      fullName,
+      role,
+      deleterName,
+      deleterRole
+    );
+
+    return this.createNotification({
+      recipient_id: deleterId,
+      title: "ลบข้อมูลผู้ใช้",
+      message: `ข้อมูลผู้ใช้ ${email} (${fullName}) ถูกลบโดย ${deleterName}`,
+      type: NotificationTypes.USER_DELETED,
+      read: false,
+      created_at: new Date().toISOString(),
+      for_role: "admin",
     });
   }
 }

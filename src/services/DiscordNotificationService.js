@@ -214,6 +214,80 @@ class DiscordNotificationService {
     };
     return this.sendToDiscord(embed);
   }
+
+  async sendUserUpdateNotification(
+    email,
+    fullName,
+    role,
+    updaterName,
+    updaterRole
+  ) {
+    const embed = {
+      title: "👤 การอัปเดตข้อมูลผู้ใช้",
+      color: 0x3498db, // สีฟ้า
+      fields: [
+        {
+          name: "📧 อีเมล",
+          value: email,
+          inline: false,
+        },
+        {
+          name: "👤 ชื่อ-นามสกุล",
+          value: fullName,
+          inline: false,
+        },
+        {
+          name: "🔑 บทบาท",
+          value: role,
+          inline: false,
+        },
+        {
+          name: "✏️ ดำเนินการโดย",
+          value: `${updaterName} (${updaterRole})`,
+          inline: false,
+        },
+      ],
+      timestamp: new Date().toISOString(),
+    };
+    return this.sendToDiscord(embed);
+  }
+
+  async sendUserDeleteNotification(
+    email,
+    fullName,
+    role,
+    deleterName,
+    deleterRole
+  ) {
+    const embed = {
+      title: "🗑️ การลบข้อมูลผู้ใช้",
+      color: 0xe74c3c, // สีแดง
+      fields: [
+        {
+          name: "📧 อีเมล",
+          value: email,
+          inline: false,
+        },
+        {
+          name: "👤 ชื่อ-นามสกุล",
+          value: fullName,
+          inline: false,
+        },
+        {
+          name: "🔑 บทบาท",
+          value: role,
+          inline: false,
+        },
+        {
+          name: "❌ ดำเนินการโดย",
+          value: `${deleterName} (${deleterRole})`,
+          inline: false,
+        },
+      ],
+      timestamp: new Date().toISOString(),
+    };
+    return this.sendToDiscord(embed);
+  }
 }
 
 export default new DiscordNotificationService();

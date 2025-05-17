@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import UserFormModal from "../components/UserFormModal";
+import notificationService from "../services/NotificationService";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -11,10 +12,32 @@ export default function UsersPage() {
   const [role, setRole] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     fetchUsers();
+    fetchCurrentUser();
   }, []);
+
+  async function fetchCurrentUser() {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from("users_profile")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+        setCurrentUser(data);
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+    }
+  }
 
   async function fetchUsers() {
     setLoading(true);
@@ -57,26 +80,9 @@ export default function UsersPage() {
     }
   }
 
-  async function deleteUser(userId) {
-    try {
-      const { error } = await supabase
-        .from("users_profile")
-        .delete()
-        .eq("id", userId);
-
-      if (error) {
-        throw error;
-      }
-
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  }
-
   async function updateUser(event) {
     event.preventDefault();
-    if (!editingUser) return;
+    if (!editingUser || !currentUser) return;
 
     try {
       const { data, error } = await supabase
@@ -87,6 +93,16 @@ export default function UsersPage() {
       if (error) {
         throw error;
       }
+
+      // Send notification
+      await notificationService.createUserUpdateNotification(
+        currentUser.id,
+        email,
+        fullName,
+        role,
+        currentUser.full_name,
+        currentUser.role
+      );
 
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
@@ -103,6 +119,39 @@ export default function UsersPage() {
       console.error("Error updating user:", error);
     } finally {
       setShowForm(false);
+    }
+  }
+
+  async function deleteUser(userId) {
+    if (!currentUser) return;
+
+    try {
+      // Get user data before deletion
+      const userToDelete = users.find((user) => user.id === userId);
+      if (!userToDelete) throw new Error("User not found");
+
+      const { error } = await supabase
+        .from("users_profile")
+        .delete()
+        .eq("id", userId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Send notification
+      await notificationService.createUserDeleteNotification(
+        currentUser.id,
+        userToDelete.email,
+        userToDelete.full_name,
+        userToDelete.role,
+        currentUser.full_name,
+        currentUser.role
+      );
+
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error("Error deleting user:", error);
     }
   }
 
