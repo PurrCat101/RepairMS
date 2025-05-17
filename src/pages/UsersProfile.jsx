@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import UserFormModal from "../components/UserFormModal";
 import notificationService from "../services/NotificationService";
+import DeleteModal from "../components/RepairTasks/DeleteModal";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -13,6 +14,8 @@ export default function UsersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -199,7 +202,6 @@ export default function UsersPage() {
           Add User
         </button>
       </div>
-
       <UserFormModal
         isOpen={showForm}
         onClose={() => {
@@ -217,8 +219,24 @@ export default function UsersPage() {
         setFullName={setFullName}
         role={role}
         setRole={setRole}
+      />{" "}
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setUserToDelete(null);
+        }}
+        onDelete={() => {
+          if (userToDelete) {
+            deleteUser(userToDelete.id);
+            setDeleteModalOpen(false);
+            setUserToDelete(null);
+          }
+        }}
+        message={`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ "${
+          userToDelete?.full_name || ""
+        }" ออกจากระบบ?`}
       />
-
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -269,7 +287,10 @@ export default function UsersPage() {
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteUser(user.id)}
+                    onClick={() => {
+                      setUserToDelete(user);
+                      setDeleteModalOpen(true);
+                    }}
                     className="text-red-600 hover:text-red-900"
                   >
                     Delete
